@@ -1,0 +1,607 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cowboy OS 2.0</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --glass: rgba(30,40,58,.88);
+  --text: #fff;
+}
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: var(--text);
+  height: 100dvh;
+  overflow: hidden;
+  background:
+    linear-gradient(#07152a22,#07152a66),
+    url("https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=1600");
+  background-size: cover;
+  background-position: center;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: 0;
+}
+
+.desktop {
+  height: calc(100dvh - 65px);
+  padding: 15px;
+}
+
+.icons {
+  display: grid;
+  grid-template-columns: repeat(1,80px);
+  gap: 10px;
+}
+
+.desktop-icon {
+  padding: 10px 4px;
+  border-radius: 9px;
+  text-align: center;
+  font-size: 13px;
+  background: transparent;
+}
+
+.desktop-icon:active {
+  background: #ffffff33;
+}
+
+.desktop-icon span {
+  display: block;
+  font-size: 34px;
+  margin-bottom: 5px;
+}
+
+/* Taskbar */
+
+.taskbar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 65px;
+  width: 100%;
+  background: var(--glass);
+  backdrop-filter: blur(25px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 17px;
+  z-index: 20;
+}
+
+.task-btn {
+  font-size: 25px;
+  background: transparent;
+  padding: 7px;
+  border-radius: 9px;
+}
+
+.task-btn:active {
+  background: #ffffff33;
+}
+
+.clock {
+  font-size: 13px;
+  text-align: center;
+  min-width: 48px;
+}
+
+/* Start menu */
+
+#startMenu {
+  display: none;
+  position: absolute;
+  bottom: 75px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92%,400px);
+  padding: 20px;
+  background: rgba(25,36,55,.96);
+  backdrop-filter: blur(30px);
+  border: 1px solid #ffffff33;
+  border-radius: 20px;
+  z-index: 30;
+  box-shadow: 0 10px 40px #0008;
+}
+
+.search {
+  width: 100%;
+  padding: 12px;
+  margin: 15px 0;
+  border: 1px solid #ffffff55;
+  border-radius: 8px;
+  background: #ffffff15;
+  color: white;
+  outline: none;
+}
+
+.search::placeholder {
+  color: #ddd;
+}
+
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.app {
+  padding: 12px 4px;
+  background: transparent;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.app:active {
+  background: #ffffff30;
+}
+
+.app span {
+  display: block;
+  font-size: 27px;
+  margin-bottom: 6px;
+}
+
+/* Windows */
+
+.window {
+  display: none;
+  position: absolute;
+  top: 12%;
+  left: 5%;
+  width: 90%;
+  max-width: 650px;
+  height: min(65%,480px);
+  background: rgba(25,35,53,.97);
+  backdrop-filter: blur(25px);
+  border: 1px solid #ffffff55;
+  border-radius: 15px;
+  overflow: hidden;
+  z-index: 10;
+  box-shadow: 0 15px 40px #0008;
+}
+
+.window-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px;
+  background: #ffffff12;
+  border-bottom: 1px solid #ffffff22;
+}
+
+.close {
+  background: #d83b3b;
+  padding: 5px 12px;
+  border-radius: 6px;
+}
+
+.window-body {
+  padding: 18px;
+  height: calc(100% - 52px);
+  overflow: auto;
+}
+
+.file-item {
+  padding: 15px;
+  margin: 7px 0;
+  background: #ffffff12;
+  border-radius: 8px;
+}
+
+.setting-btn {
+  width: 100%;
+  padding: 13px;
+  margin: 7px 0;
+  background: #ffffff16;
+  border-radius: 8px;
+  text-align: left;
+}
+
+/* Quick settings */
+
+#quick {
+  display: none;
+  position: absolute;
+  bottom: 75px;
+  right: 10px;
+  width: min(90%,330px);
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(25,36,55,.97);
+  z-index: 35;
+}
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.quick-grid button {
+  padding: 15px 5px;
+  background: #ffffff20;
+  border-radius: 10px;
+}
+
+/* Light mode */
+
+body.light {
+  color: #182334;
+  background:
+    linear-gradient(#ffffff22,#ffffff33),
+    url("https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=1600");
+  background-size: cover;
+}
+
+body.light .taskbar {
+  background: rgba(235,242,250,.90);
+  color: #182334;
+}
+
+body.light .window,
+body.light #startMenu,
+body.light #quick {
+  background: rgba(238,244,252,.97);
+  color: #182334;
+}
+
+body.light .setting-btn,
+body.light .file-item,
+body.light .quick-grid button {
+  background: #00000012;
+  color: #182334;
+}
+
+@media(min-width:700px) {
+  .window {
+    left: 20%;
+    top: 15%;
+    width: 60%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="desktop">
+  <div class="icons">
+
+    <button class="desktop-icon" onclick="openApp('pc')">
+      <span>💻</span>This PC
+    </button>
+
+    <button class="desktop-icon" onclick="openApp('files')">
+      <span>📁</span>File Explorer
+    </button>
+
+    <button class="desktop-icon" onclick="openApp('settings')">
+      <span>⚙️</span>Settings
+    </button>
+
+    <button class="desktop-icon" onclick="openApp('about')">
+      <span>🖥️</span>About
+    </button>
+
+  </div>
+</div>
+
+<!-- Start Menu -->
+
+<div id="startMenu">
+  <h2>Start</h2>
+  <input class="search" id="appSearch"
+    placeholder="Search apps..."
+    oninput="searchApps()">
+
+  <h4>Pinned apps</h4>
+
+  <div class="app-grid" id="appGrid">
+
+    <button class="app" data-name="This PC"
+      onclick="openApp('pc')">
+      <span>💻</span>This PC
+    </button>
+
+    <button class="app" data-name="File Explorer"
+      onclick="openApp('files')">
+      <span>📁</span>Files
+    </button>
+
+    <button class="app" data-name="Settings"
+      onclick="openApp('settings')">
+      <span>⚙️</span>Settings
+    </button>
+
+    <button class="app" data-name="Browser"
+      onclick="openApp('browser')">
+      <span>🌐</span>Browser
+    </button>
+
+    <button class="app" data-name="Calculator"
+      onclick="openApp('calculator')">
+      <span>🧮</span>Calculator
+    </button>
+
+    <button class="app" data-name="About"
+      onclick="openApp('about')">
+      <span>🖥️</span>About
+    </button>
+
+  </div>
+
+  <hr style="margin:18px 0;border-color:#ffffff33">
+
+  <p>👤 Cowboy User</p>
+  <button class="setting-btn" onclick="closeAll()">
+    ⏻ Close all windows
+  </button>
+</div>
+
+<!-- Quick settings -->
+
+<div id="quick">
+  <h3>Quick Settings</h3>
+  <div class="quick-grid">
+    <button onclick="toggleLight()">☀️ Light mode</button>
+    <button onclick="showNotice('Wi-Fi is a demo control')">📶 Wi-Fi</button>
+    <button onclick="showNotice('Bluetooth is a demo control')">ᛒ Bluetooth</button>
+    <button onclick="showNotice('Airplane mode is a demo control')">✈️ Airplane</button>
+  </div>
+  <p style="margin-top:15px;font-size:12px">
+    Cowboy OS control center
+  </p>
+</div>
+
+<!-- App Window -->
+
+<div class="window" id="appWindow">
+  <div class="window-head">
+    <b id="windowTitle">Application</b>
+    <button class="close" onclick="closeWindow()">✕</button>
+  </div>
+  <div class="window-body" id="windowBody"></div>
+</div>
+
+<!-- Taskbar -->
+
+<div class="taskbar">
+
+  <button class="task-btn" onclick="toggleStart()">⊞</button>
+
+  <button class="task-btn"
+    onclick="openApp('browser')">🌐</button>
+
+  <button class="task-btn"
+    onclick="openApp('files')">📁</button>
+
+  <button class="task-btn"
+    onclick="openApp('settings')">⚙️</button>
+
+  <button class="task-btn"
+    onclick="toggleQuick()">📶</button>
+
+  <button class="task-btn clock"
+    onclick="toggleQuick()">
+    <span id="time">00:00</span>
+    <br>
+    <span id="date">Date</span>
+  </button>
+
+</div>
+
+<script>
+
+const start = document.getElementById("startMenu");
+const quick = document.getElementById("quick");
+const win = document.getElementById("appWindow");
+
+function toggleStart() {
+  start.style.display =
+    start.style.display === "block" ? "none" : "block";
+  quick.style.display = "none";
+}
+
+function toggleQuick() {
+  quick.style.display =
+    quick.style.display === "block" ? "none" : "block";
+  start.style.display = "none";
+}
+
+function closeWindow() {
+  win.style.display = "none";
+}
+
+function closeAll() {
+  closeWindow();
+  start.style.display = "none";
+  quick.style.display = "none";
+}
+
+function showNotice(message) {
+  alert(message);
+}
+
+function openApp(app) {
+
+  start.style.display = "none";
+  quick.style.display = "none";
+
+  const titles = {
+    pc: "This PC",
+    files: "File Explorer",
+    settings: "Settings",
+    browser: "Browser",
+    calculator: "Calculator",
+    about: "About Cowboy OS"
+  };
+
+  document.getElementById("windowTitle").innerText =
+    titles[app] || "Application";
+
+  const body = document.getElementById("windowBody");
+
+  const content = {
+
+    pc: `
+      <h2>💻 This PC</h2>
+      <div class="file-item">💽 Local Disk (C:) — Demo</div>
+      <div class="file-item">📁 Documents</div>
+      <div class="file-item">📁 Downloads</div>
+      <div class="file-item">📁 Pictures</div>
+      <p style="margin-top:15px">
+        This is a simulated PC interface.
+      </p>
+    `,
+
+    files: `
+      <h2>📁 File Explorer</h2>
+      <div class="file-item">🏠 Home</div>
+      <div class="file-item">📂 Documents</div>
+      <div class="file-item">📥 Downloads</div>
+      <div class="file-item">🖼️ Pictures</div>
+      <div class="file-item">🎵 Music</div>
+      <div class="file-item">🎬 Videos</div>
+      <p>Demo folders. Not your phone's real files.</p>
+    `,
+
+    settings: `
+      <h2>⚙️ Settings</h2>
+      <button class="setting-btn"
+        onclick="toggleLight()">🎨 Change appearance</button>
+      <button class="setting-btn"
+        onclick="showNotice('Cowboy OS 2.0')">💻 System information</button>
+      <button class="setting-btn"
+        onclick="showNotice('Display settings demo')">🖥️ Display</button>
+      <button class="setting-btn"
+        onclick="showNotice('Personalization settings demo')">✨ Personalization</button>
+    `,
+
+    browser: `
+      <h2>🌐 Cowboy Browser</h2>
+      <p>Enter a website to open in a new tab.</p>
+      <input class="search" id="webAddress"
+        placeholder="https://example.com">
+      <button class="setting-btn"
+        onclick="browse()">Open website ↗</button>
+    `,
+
+    calculator: `
+      <h2>🧮 Calculator</h2>
+      <input class="search" id="calcInput"
+        placeholder="Example: 12+8*2">
+      <button class="setting-btn"
+        onclick="calculate()">Calculate</button>
+      <h3 id="calcResult">Result appears here</h3>
+    `,
+
+    about: `
+      <h2>🖥️ Cowboy OS 2.0</h2>
+      <p>Windows-inspired browser desktop.</p>
+      <p style="margin-top:12px">Version: 2.0</p>
+      <p>Built with HTML, CSS and JavaScript.</p>
+      <p style="margin-top:12px">Made with ❤️ for mobile.</p>
+    `
+  };
+
+  body.innerHTML = content[app] || "App not found";
+  win.style.display = "block";
+}
+
+function toggleLight() {
+  document.body.classList.toggle("light");
+}
+
+function searchApps() {
+  const query =
+    document.getElementById("appSearch").value.toLowerCase();
+
+  document.querySelectorAll(".app").forEach(item => {
+    item.style.display =
+      item.dataset.name.toLowerCase().includes(query)
+      ? "block" : "none";
+  });
+}
+
+function browse() {
+  let address =
+    document.getElementById("webAddress").value.trim();
+
+  if (!address) return;
+
+  if (!/^https?:\/\//i.test(address)) {
+    address = "https://" + address;
+  }
+
+  try {
+    const url = new URL(address);
+    if (!["http:", "https:"].includes(url.protocol)) return;
+    window.open(url.href, "_blank", "noopener");
+  } catch {
+    alert("Please enter a valid website address.");
+  }
+}
+
+function calculate() {
+  const expression =
+    document.getElementById("calcInput").value.trim();
+
+  if (!/^[0-9+\-*/().%\s]+$/.test(expression)) {
+    alert("Please enter a simple maths expression.");
+    return;
+  }
+
+  try {
+    const result = Function(
+      '"use strict"; return (' + expression + ')'
+    )();
+
+    document.getElementById("calcResult").innerText =
+      Number.isFinite(result) ? result : "Invalid calculation";
+  } catch {
+    document.getElementById("calcResult").innerText =
+      "Invalid calculation";
+  }
+}
+
+function updateClock() {
+  const now = new Date();
+
+  document.getElementById("time").innerText =
+    now.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+
+  document.getElementById("date").innerText =
+    now.toLocaleDateString([], {
+      day: "2-digit",
+      month: "short"
+    });
+}
+
+updateClock();
+setInterval(updateClock, 1000);
+
+</script>
+
+</body>
+</html>
